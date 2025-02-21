@@ -3,7 +3,10 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
+from time import sleep
 
 
 image_name=[]
@@ -11,15 +14,35 @@ cost=[]
 rating=[]
 image_link=[]
 
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
-for i in range(1,20):
-    url="https://www.flipkart.com/all/~cs-srqvl071ka/pr?sid=all&collection-tab-name=++Indoor+Games&ctx=eyJjYXJkQ29udGV4dCI6eyJhdHRyaWJ1dGVzIjp7InRpdGxlIjp7Im11bHRpVmFsdWVkQXR0cmlidXRlIjp7ImtleSI6InRpdGxlIiwiaW5mZXJlbmNlVHlwZSI6IlRJVExFIiwidmFsdWVzIjpbIkluZG9vciBUb3lzIl0sInZhbHVlVHlwZSI6Ik1VTFRJX1ZBTFVFRCJ9fX19fQ%3D%3D&wid=11.productCard.PMU_V2_5&page="+str(i)
-    driver.get(url)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+wait = WebDriverWait(driver, 10)
+
+driver.get("https://www.flipkart.com/")
+
+
+
+input_search=driver.find_element(By.CLASS_NAME,"Pke_EE")
+input_search.send_keys("Indoor Games")
+search_button=driver.find_element(By.CLASS_NAME,"_2iLD__")
+search_button.click()
+
+sort_by_section = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "sHCOk2")))
+
+# Step 4: Click on "Popularity" in the Sort By section
+popularity_option = sort_by_section.find_element(By.XPATH, "//div[contains(text(), 'Popularity')]")
+popularity_option.click()
+base_url = driver.current_url
+print(f"✅ Captured Popularity URL: {base_url}")
+
+
+for i in range(1,3):
+    required_url = f"{base_url}&page={i}"
+    driver.get(required_url)
     print("Page title:", driver.title)
 
 
-    main_box=driver.find_element(By.CLASS_NAME,"DOjaWF")
+    main_box=driver.find_element(By.CLASS_NAME,"DOjaWF")    
 
     img_name=main_box.find_elements(By.CLASS_NAME,"wjcEIp")    
     for name in img_name:
@@ -65,7 +88,7 @@ data=pd.DataFrame({
     "Image Links":image_link
 })
 
-data.to_csv('flipkart_data.csv',index_label="S.No.")
+data.to_csv('flipkart_data2.csv',index_label="S.No.")
 
 
 driver.quit()
